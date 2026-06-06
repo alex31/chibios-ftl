@@ -2609,7 +2609,7 @@ endmacro
 
 /* Emits a visual separator for one clock point.*/
 macro EmitClockPointSeparator(point)
-  local line = "/*--- Macros and checks for the " + point["name"] + " clock point. "
+  local line = "/* --- Macros and checks for the " + point["name"] + " clock point. "
   emit line?right_pad(76, "-") + "*/\n"
 endmacro
 

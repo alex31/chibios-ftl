@@ -79,8 +79,6 @@
 /* Driver macros.                                                            */
 /*===========================================================================*/
 
-[@clocktree.EmitCurrentClockDefinitions /]
-
 [@clocktree.EmitStaticClockPointGetter /]
 
 /*===========================================================================*/
