@@ -121,6 +121,22 @@ Clock definitions with enable-state bits use a clock-level `<bits enabled="..."
 disabled="..."/>` element. Those bits are combined with selection bits when the
 clock has a mux/divider/multiplier selection.
 
+Generated `<POINT><frequency-suffix>` macros describe the default static
+configuration and must be preprocessor-evaluable. Frequency expressions must not
+contain runtime function calls such as `hal_lld_get_clock_point(...)`; use
+`<POINT><current-clock-suffix>` macros or driver-side runtime logic for values
+that depend on dynamic clock state.
+
+Generated `<POINT><current-clock-suffix>` macros describe the effective/current
+clock value and are emitted next to the related frequency macros so
+mux/divider/multiplier conditions are not duplicated in a separate section.
+
+A future generated `clocktree.c` should start with dynamic limit verification
+over an externally supplied array of clock point values. Full reconstruction of
+clock point values from RCC register state stays in `hal_lld.c` for now because
+it depends on device-specific decoding and initialization semantics that are not
+fully modeled in the XML.
+
 ## Dynamic Reconfiguration Contract
 
 Dynamic mode is intentionally not a promise that every RCC selector can be
