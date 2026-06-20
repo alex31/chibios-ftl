@@ -220,6 +220,7 @@
         </xs:attribute>
         <xs:attribute name="ancestorname" type="identifierType">
         </xs:attribute>
+        <xs:attribute name="check" type="xs:string"></xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

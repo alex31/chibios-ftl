@@ -125,6 +125,14 @@
 [/#function]
 
 [#--
+  -- Returns the check (conditional compilation) attribute from an XML node,
+  -- trimmed. An empty result means the node is not conditionally compiled.
+  --]
+[#function GetNodeCheck node=[] default=""]
+  [#return (node.@check[0]!default)?trim]
+[/#function]
+
+[#--
   -- Returns the interface C type from an XML node.
   --]
 [#function GetInterfaceCType node=[] default=""]
@@ -391,6 +399,11 @@
           classdescr        = GetNodeDescription(class)
           ancestorname      = GetNodeAncestorName(class, "")]
   [#local ancestors = GetClassAncestorsSequence(class)]
+  [#local classcheck = GetNodeCheck(class)]
+  [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+
+  [/#if]
 /**
   [@doxygen.EmitTagVerbatim indent="" tag="class" text=classctype /]
   [#if ancestorname?length > 0]
@@ -444,6 +457,10 @@ ${ccode.MakeVariableDeclaration(ccode.indentation "vmt" vmtctype)}
                                           fields = class.fields /]
 };
 /** @} */
+  [#if classcheck?length > 0]
+
+#endif /* ${classcheck} */
+  [/#if]
 [/#macro]
 
 [#--
@@ -750,6 +767,10 @@ CC_FORCE_INLINE
   [#local class = node]
   [#if class.methods.inline.*?size > 0]
     [#local classctype = GetClassCType(class)]
+    [#local classcheck = GetNodeCheck(class)]
+    [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+    [/#if]
 /**
 [@doxygen.EmitTagVerbatim "" "name" "Inline methods of " + classctype /]
  * @{
@@ -758,6 +779,9 @@ CC_FORCE_INLINE
                   classctype = classctype
                   modifiers  = ["static", "inline"] /]
 /** @} */
+    [#if classcheck?length > 0]
+#endif /* ${classcheck} */
+    [/#if]
 
   [/#if]
 [/#macro]
@@ -810,9 +834,19 @@ CC_FORCE_INLINE
   [#local class = node]
   [#local classnamespace = GetNodeNamespace(class)
           classctype     = GetClassCType(class) /]
+  [#if class.methods.virtual.method?size > 0]
+    [#local classcheck = GetNodeCheck(class)]
+    [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+    [/#if]
 [@GenerateVirtualMethods methods   = class.methods.virtual
                          ctype     = classctype
                          namespace = classnamespace /]
+    [#if classcheck?length > 0]
+#endif /* ${classcheck} */
+
+    [/#if]
+  [/#if]
 [/#macro]
 
 [#--
@@ -899,9 +933,16 @@ CC_FORCE_INLINE
   --]
 [#macro GenerateClassMethodsPrototypes class=[]]
     [#local classctype = GetClassCType(class)]
+    [#local classcheck = GetNodeCheck(class)]
+    [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+    [/#if]
 [@ccode.Indent 1 /]/* Methods of ${classctype}.*/
 [@GenerateClassPrototypes node=class /]
 [@GenerateClassRegularMethodsPrototypes node=class.methods.regular /]
+    [#if classcheck?length > 0]
+#endif /* ${classcheck} */
+    [/#if]
 [/#macro]
 
 [#--
@@ -1060,6 +1101,10 @@ ${s}
           classdescr        = GetNodeDescription(node) /]
   [#if classtype == "regular"]
     [#assign generated = true]
+    [#local classcheck = GetNodeCheck(node)]
+    [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+    [/#if]
 /**
 [@doxygen.EmitTagVerbatim "" "name" "Default constructor of " + classctype /]
  * @{
@@ -1089,6 +1134,9 @@ ${s}
                              params      = params /]
 }
 /** @} */
+    [#if classcheck?length > 0]
+#endif /* ${classcheck} */
+    [/#if]
 
   [/#if]
 [/#macro]
@@ -1104,6 +1152,10 @@ ${s}
           classdescr        = GetNodeDescription(node) /]
   [#if classtype == "regular"]
     [#assign generated = true]
+    [#local classcheck = GetNodeCheck(node)]
+    [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+    [/#if]
 /**
 [@doxygen.EmitTagVerbatim "" "name" "Default constructor of " + classctype /]
  * @{
@@ -1135,6 +1187,9 @@ CC_FORCE_INLINE
                              params      = params /]
 }
 /** @} */
+    [#if classcheck?length > 0]
+#endif /* ${classcheck} */
+    [/#if]
 
   [/#if]
 [/#macro]
@@ -1335,8 +1390,17 @@ ${ccode.MakeVariableDeclaration(ccode.indentation "vmt" vmtctype)}
   -- This macro generates the class code from an XML node.
   --]
 [#macro GenerateClassCode class=[] modifiers=[]]
+  [#local classcheck = GetNodeCheck(class)]
+  [#if classcheck?length > 0]
+#if (${classcheck}) || defined (__DOXYGEN__)
+
+  [/#if]
 [@GenerateClassInterfacesImplementations node=class /]
 [@GenerateClassImplementations node=class modifiers=modifiers /]
 [@GenerateClassVMT node=class modifiers=modifiers /]
 [@GenerateClassRegularMethods node=class modifiers=modifiers /]
+  [#if classcheck?length > 0]
+#endif /* ${classcheck} */
+
+  [/#if]
 [/#macro]

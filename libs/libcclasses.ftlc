@@ -124,6 +124,14 @@ function GetNodeDescription(node=[], default="no-descr")
 endfunction
 
 /*
+  -- Returns the check (conditional compilation) attribute from an XML node,
+  -- trimmed. An empty result means the node is not conditionally compiled.
+  */
+function GetNodeCheck(node=[], default="")
+  return (node.@check[0]!default)?trim
+endfunction
+
+/*
   -- Returns the interface C type from an XML node.
   */
 function GetInterfaceCType(node=[], default="")
@@ -390,6 +398,11 @@ macro GenerateClass(node=[])
   local classdescr        = GetNodeDescription(class)
   local ancestorname      = GetNodeAncestorName(class, "")
   local ancestors = GetClassAncestorsSequence(class)
+  local classcheck = GetNodeCheck(class)
+  if classcheck?length > 0
+    emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    emit "\n"
+  endif
   emit "/**\n"
   doxygen.EmitTagVerbatim(indent="", tag="class", text=classctype)
   if ancestorname?length > 0
@@ -451,6 +464,10 @@ macro GenerateClass(node=[])
   )
   emit "};\n"
   emit "/** @} */\n"
+  if classcheck?length > 0
+    emit "\n"
+    emit "#endif /* ${classcheck} */\n"
+  endif
 endmacro
 
 /*
@@ -828,6 +845,10 @@ macro GenerateClassInlineMethods(node=[])
   local class = node
   if class.methods.inline.*?size > 0
     local classctype = GetClassCType(class)
+    local classcheck = GetNodeCheck(class)
+    if classcheck?length > 0
+      emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    endif
     emit "/**\n"
     doxygen.EmitTagVerbatim("", "name", "Inline methods of " + classctype)
     emit " * @{\n"
@@ -838,6 +859,9 @@ macro GenerateClassInlineMethods(node=[])
       modifiers  = ["static", "inline"]
     )
     emit "/** @} */\n"
+    if classcheck?length > 0
+      emit "#endif /* ${classcheck} */\n"
+    endif
     emit "\n"
   endif
 endmacro
@@ -898,11 +922,21 @@ macro GenerateClassVirtualMethods(node=[])
   local class = node
   local classnamespace = GetNodeNamespace(class)
   local classctype     = GetClassCType(class)
-  GenerateVirtualMethods(
-    methods   = class.methods.virtual,
-    ctype     = classctype,
-    namespace = classnamespace
-  )
+  if class.methods.virtual.method?size > 0
+    local classcheck = GetNodeCheck(class)
+    if classcheck?length > 0
+      emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    endif
+    GenerateVirtualMethods(
+      methods   = class.methods.virtual,
+      ctype     = classctype,
+      namespace = classnamespace
+    )
+    if classcheck?length > 0
+      emit "#endif /* ${classcheck} */\n"
+      emit "\n"
+    endif
+  endif
 endmacro
 
 /*
@@ -1004,10 +1038,17 @@ endmacro
   */
 macro GenerateClassMethodsPrototypes(class=[])
     local classctype = GetClassCType(class)
+    local classcheck = GetNodeCheck(class)
+    if classcheck?length > 0
+      emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    endif
     ccode.Indent(1)
     emit "/* Methods of ${classctype}.*/\n"
     GenerateClassPrototypes(node=class)
     GenerateClassRegularMethodsPrototypes(node=class.methods.regular)
+    if classcheck?length > 0
+      emit "#endif /* ${classcheck} */\n"
+    endif
 endmacro
 
 /*
@@ -1178,6 +1219,10 @@ macro GenerateClassPrivateConstructor(node=[])
   local classdescr        = GetNodeDescription(node)
   if classtype == "regular"
     assign generated = true
+    local classcheck = GetNodeCheck(node)
+    if classcheck?length > 0
+      emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    endif
     emit "/**\n"
     doxygen.EmitTagVerbatim("", "name", "Default constructor of " + classctype)
     emit " * @{\n"
@@ -1214,6 +1259,9 @@ macro GenerateClassPrivateConstructor(node=[])
     )
     emit "}\n"
     emit "/** @} */\n"
+    if classcheck?length > 0
+      emit "#endif /* ${classcheck} */\n"
+    endif
     emit "\n"
   endif
 endmacro
@@ -1229,6 +1277,10 @@ macro GenerateClassPublicConstructor(node=[])
   local classdescr        = GetNodeDescription(node)
   if classtype == "regular"
     assign generated = true
+    local classcheck = GetNodeCheck(node)
+    if classcheck?length > 0
+      emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    endif
     emit "/**\n"
     doxygen.EmitTagVerbatim("", "name", "Default constructor of " + classctype)
     emit " * @{\n"
@@ -1268,6 +1320,9 @@ macro GenerateClassPublicConstructor(node=[])
     )
     emit "}\n"
     emit "/** @} */\n"
+    if classcheck?length > 0
+      emit "#endif /* ${classcheck} */\n"
+    endif
     emit "\n"
   endif
 endmacro
@@ -1489,8 +1544,17 @@ endmacro
   -- This macro generates the class code from an XML node.
   */
 macro GenerateClassCode(class=[], modifiers=[])
+  local classcheck = GetNodeCheck(class)
+  if classcheck?length > 0
+    emit "#if (${classcheck}) || defined (__DOXYGEN__)\n"
+    emit "\n"
+  endif
   GenerateClassInterfacesImplementations(node=class)
   GenerateClassImplementations(node=class, modifiers=modifiers)
   GenerateClassVMT(node=class, modifiers=modifiers)
   GenerateClassRegularMethods(node=class, modifiers=modifiers)
+  if classcheck?length > 0
+    emit "#endif /* ${classcheck} */\n"
+    emit "\n"
+  endif
 endmacro
