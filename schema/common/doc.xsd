@@ -35,7 +35,7 @@
             <xs:simpleType>
               <xs:restriction base="xs:string">
                 <xs:minLength value="0"></xs:minLength>
-                <xs:maxLength value="72"></xs:maxLength>
+                <xs:maxLength value="80"></xs:maxLength>
                 <xs:whiteSpace value="collapse"></xs:whiteSpace>
               </xs:restriction>
             </xs:simpleType>

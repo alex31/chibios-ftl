@@ -325,6 +325,9 @@
             <xs:element name="xclass" maxOccurs="1" minOccurs="1">
               <xs:complexType />
             </xs:element>
+            <xs:element name="special" maxOccurs="1" minOccurs="1">
+              <xs:complexType />
+            </xs:element>
           </xs:choice>
         </xs:sequence>
       </xs:extension>
